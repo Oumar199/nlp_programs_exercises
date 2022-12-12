@@ -1,0 +1,7 @@
+{
+    "python.defaultInterpreterPath": "C:\\Users\\Oumar Kane\\AppData\\Local\\pypoetry\\Cache\\virtualenvs\\grammarrules-R9LSO1qf-py3.10\\Scripts\\python.exe",
+    "python.terminal.activateEnvironment": true,
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000
+}
