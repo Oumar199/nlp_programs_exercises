@@ -3,5 +3,8 @@
     "python.terminal.activateEnvironment": true,
     "terminal.integrated.defaultProfile.windows": "Command Prompt",
     "files.autoSave": "afterDelay",
-    "files.autoSaveDelay": 1000
+    "files.autoSaveDelay": 1000,
+    "cSpell.words": [
+        "lemmatization"
+    ]
 }
