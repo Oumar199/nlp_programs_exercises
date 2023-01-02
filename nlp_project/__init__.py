@@ -7,8 +7,12 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import seaborn as sns
-from typing import Union
+from typing import Union, List, Tuple
 from tqdm import tqdm
 import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import RegexpTokenizer, word_tokenize, wordpunct_tokenize
+from wordcloud import WordCloud
+
 
 plt.style.use('ggplot')
