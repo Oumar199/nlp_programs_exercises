@@ -13,6 +13,8 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer, word_tokenize, wordpunct_tokenize
 from wordcloud import WordCloud
+import spacy
+import re
 
 
 plt.style.use('ggplot')

@@ -169,3 +169,102 @@ def words_w_same_classes(freqs_series: List[pd.Series], top: int = 10):
                 words.add(word)
    
     return list(commons)
+
+def tokenization(nlp, 
+                 corpus: Union[List[str], Tuple[str]],
+                 rm_stopwords: bool = True,
+                 rm_punctations: bool = True,
+                 rm_non_ascii: bool = True,
+                 only_alpha: bool = True,
+                 rm_spaces: bool = True,
+                 keep_urls: bool = False,
+                 keep_emoji: bool = False,
+                 keep_html: bool = False,
+                 keep_mentions: bool = False,
+                 keep_upper: bool = True,
+                 lemmatize: bool = True,
+                 min_length: Union[int, None] = None,
+                 max_length: Union[int, None] = None,
+                 entities_to_remove: Union[List[str], None] = None,
+                 pos_tags: Union[List[str], None] = None,
+                 ):
+    
+    # Verify if the min length and max length are higher than 0 and that max length is higher than min length
+    assert not min_length or min_length > 0
+    assert not max_length or max_length > 0
+    assert (not min_length or not max_length) or min_length <= max_length
+    
+    # Create a inner function to tokenize a given document
+    def transformation(doc):
+        
+        tokens = []
+        
+        for token in doc:
+            
+            add_token = True
+            
+            if (min_length and not len(token) >= min_length)\
+                or (max_length and not len(token) <= max_length)\
+                or (rm_stopwords and token.is_stop)\
+                or (rm_punctations and token.is_punct)\
+                or (rm_non_ascii and not token.is_ascii)\
+                or (rm_spaces and token.is_space)\
+                or (only_alpha and not token.is_alpha)\
+                or (keep_urls and not token.like_url)\
+                or (entities_to_remove and token.ent_type_ in entities_to_remove)\
+                or (pos_tags and token.pos_ not in pos_tags):
+                    
+                    add_token = False
+            
+            try:
+                
+                if not keep_mentions and token._.like_mention:
+            
+                    add_token = False
+            
+            except AttributeError:
+            
+                pass
+            
+            try: 
+                
+                if not keep_html and token._.like_html:
+                    
+                    add_token = False
+            
+            except AttributeError:
+                
+                pass
+            
+            try: 
+                
+                if not keep_emoji and token._.like_emoji:
+                    
+                    add_token = False
+            
+            except AttributeError:
+                
+                pass
+            
+            if add_token:
+                
+                is_upper = token.is_upper
+                
+                token = token.lemma_ if lemmatize else token.text
+       
+                tokens.append(token if keep_upper and is_upper else token.lower())
+            
+        return tokens
+                
+    # Let's create a pipeline with the nlp object
+    docs = nlp.pipe(corpus)
+    
+    # Initialize the list of tokenized documents
+    tokens = []
+    
+    for doc in docs:
+        
+        tokens.append(transformation(doc))
+    
+    return tokens
+    
