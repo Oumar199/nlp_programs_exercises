@@ -198,6 +198,7 @@ def tokenization(nlp,
     def transformation(doc):
         
         tokens = []
+        corp_pos_tags = {}
         
         for token in doc:
             
@@ -250,21 +251,34 @@ def tokenization(nlp,
                 
                 is_upper = token.is_upper
                 
+                pos = token.pos_
                 token = token.lemma_ if lemmatize else token.text
-       
+
+                corp_pos_tags[token] = pos
                 tokens.append(token if keep_upper and is_upper else token.lower())
             
-        return tokens
+        return tokens, corp_pos_tags
                 
     # Let's create a pipeline with the nlp object
     docs = nlp.pipe(corpus)
     
-    # Initialize the list of tokenized documents
+    # Initialize the list of tokenized documents and the list of pos_tags
     tokens = []
+    corp_pos_tags = {}
     
     for doc in docs:
         
-        tokens.append(transformation(doc))
+        tokens_, corp_pos_tags_ = transformation(doc)
     
-    return tokens
+        tokens.append(tokens_)
+        
+        corp_pos_tags.update(corp_pos_tags_)
+        
+    return tokens, corp_pos_tags
+
+def get_n_grams(tokens: list, n: int = 2):
+    n_grams = []
+    for i in range(len(tokens) - n):
+        n_grams.append(" ".join(tokens[i: i+n])) 
+    return n_grams  
     
