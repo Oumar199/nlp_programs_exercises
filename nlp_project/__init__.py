@@ -12,6 +12,7 @@ from tqdm import tqdm
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer, word_tokenize, wordpunct_tokenize
+from sklearn.feature_extraction.text import TfidfVectorizer
 from wordcloud import WordCloud
 import spacy
 import re

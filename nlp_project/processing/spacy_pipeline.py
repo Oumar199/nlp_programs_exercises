@@ -23,6 +23,7 @@ class TextPipeProcessing:
     - recuperate_results*
     - add_results_to_data_frame*
     - plot_wordcloud
+    - get_tf_idf
     """
     def __init__(self, data_frame: pd.DataFrame, text_column: str, target_column: str = 'target'):
         """Initialize main attributes
@@ -69,6 +70,7 @@ class TextPipeProcessing:
                       entities_to_remove: Union[List[str], None] = None,
                       pos_tags: Union[List[str], None] = None,
                       ):
+
         
         self._nlp = nlp
         
@@ -77,9 +79,9 @@ class TextPipeProcessing:
         
         texts = self.data_frame[self.text_column]
         
-        texts = texts.tolist()
+        self._texts = texts.tolist()
         
-        self._tokens, self._pos_tags = tokenization(nlp,
+        self._tokenizer = lambda texts: tokenization(nlp,
                       texts,
                       rm_stopwords,
                       rm_punctations,
@@ -97,9 +99,19 @@ class TextPipeProcessing:
                       entities_to_remove,
                       pos_tags,
                     )
+        
+        self._tokens, self._pos_tags = self._tokenizer(self._texts)
     
         return self._tokens, self._pos_tags
+    
+    def get_tf_idf(self):
         
+        tf_idf = TfidfVectorizer(tokenizer = self._tokenizer)
+        
+        values = tf_idf.fit_transform(self._texts)
+        
+        return values
+    
     def create_corpus(self):
         
         self._corpus = []
@@ -328,7 +340,13 @@ class TextPipeProcessing:
 
             tokens = self._tokens[index]
             
-            tokens = [token for token in tokens if token in words]
+            if self._stemmer:
+                
+                tokens = [self._stemmer.stem(token) for token in tokens if self._stemmer.stem(token) in words]
+            
+            else:
+            
+                tokens = [token for token in tokens if token in words]
             
             return " ".join(tokens)
         
