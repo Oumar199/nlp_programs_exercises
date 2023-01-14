@@ -1,6 +1,42 @@
+class NLPPipeline:
+    
+    pipeline = {}
+    
+    def __init__(self, data_frame: pd.DataFrame, text_column: str, target_column: str = 'target', name: str = "nlp_pipeline"):
 
-from nlp_project.processing.utils import *
-from typing import List
+        self.name = name
+        
+        self.data_frame = data_frame
+        
+        self.text_column = text_column
+        
+        self.target_column = target_column
+    
+    def __enter__(self):
+        
+        self.current_pipe = []
+        
+        processing = TextPipeProcessing(self.data_frame, self.text_column, self.target_column)
+        
+        return self, processing
+    
+    def add_new_step(self, method: Callable, get_results: bool = True, *args, **kwargs):
+        
+        dict_ = {"method": method, "args": args, "kwargs": kwargs, "result": get_results}
+        
+        print(dict_)
+        
+        self.current_pipe.append(dict_)
+    
+    def __exit__(self, ctx_ept, ctx_value, ctx_tb):
+        
+        self.pipeline[self.name] = self.current_pipe
+        
+        print("You can execute the pipeline with the `pipeline_name.execute_pipeline`! The pipelines are available in the attribute `pipeline`.")
+        
+        return ctx_value 
+        
+    
 
 class TextPipeProcessing:
     """The pipeline is composed by (* if obligatory processing; ** if most important):
@@ -27,10 +63,8 @@ class TextPipeProcessing:
     - some other issues...
     - use context manager to store a pipeline
     """
-    pipeline = {}
-    iteration = 0
     
-    def __init__(self, data_frame: pd.DataFrame, text_column: str, target_column: str = 'target', name: str = "nlp_pipeline"):
+    def __init__(self, data_frame: pd.DataFrame, text_column: str, target_column: str = 'target'):
         """Initialize main attributes
 
         Args:
@@ -38,8 +72,6 @@ class TextPipeProcessing:
             text_column (str): The name of the text column
             target_column (str, optional): The name of the target column. Defaults to 'target'.
         """
-        
-        self.name = name
         
         self.data_frame = data_frame
         
@@ -63,16 +95,7 @@ class TextPipeProcessing:
         
         self.trigrams = None
 
-    def __enter__(self):
-        
-        self.current_pipe = []
-        
-        return self
     
-    def __call__(self, method: Callable, get_results: bool = True, *args, **kwargs):
-    
-        self.current_pipe.append({"method": method, "args": args, "kwargs": kwargs, "result": get_results})
-        
     def tokenize_text(self,
                       nlp, 
                       rm_stopwords: bool = True,
@@ -477,15 +500,15 @@ class TextPipeProcessing:
         # Render frame with displacy
         spacy.displacy.render(doc, style=style)
     
-    def execute_pipeline(self, name: str = "nlp_pipeline"):
+    def execute_pipeline(self, pipeline_: NLPPipeline, name: str = "nlp_pipeline"):
         
         results = []
         
         try:
         
-            pipeline = self.pipeline[name]
+            pipeline = pipeline_.pipeline[name]
             
-            for pipe in tqdm(pipeline):
+            for pipe in pipeline:
                 
                 args = pipe['args']
                 
@@ -506,12 +529,4 @@ class TextPipeProcessing:
         except KeyError:
             
             raise ValueError("The pipeline that you specified doesn't exist!")
-    
-    def __exit__(self, ctx_ept, ctx_value, ctx_tb):
-        
-        self.pipeline[self.name] = self.current_pipe
-        
-        print("You can execute the pipeline with the `pipeline_name.execute_pipeline`! The pipelines are available in the attribute `pipeline`.")
-        
-        return ctx_value 
-      
+
