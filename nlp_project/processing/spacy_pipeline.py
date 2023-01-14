@@ -495,11 +495,11 @@ class TextPipeProcessing:
                 
                 result = pipe['result']
                 
-                results = method(*args, **kwargs)
+                results_ = method(*args, **kwargs)
                 
                 if result:
                     
-                    results.append(results)
+                    results.append(results_)
             
             return results
         
