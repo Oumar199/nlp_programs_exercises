@@ -351,13 +351,15 @@ class TextPipeProcessing:
         
         return self._results
     
-    def add_results_to_data_frame(self, new_text_column_name: Union[str, None] = None):
+    def add_results_to_data_frame(self, new_text_column_name: Union[str, None] = None, add_list_column: bool = True):
         
         if self._grams_active:
                 
                 print("You didn't reset the corpus with the `reset_corpus` method!")
         
         if not new_text_column_name: new_text_column_name = self.text_column
+        
+        i = 0
         
         def clean_text(index: int, words: Union[nltk.FreqDist, list, set, tuple] = self._results):
             """Clean a given document by taking only words that are chosen as representative of the target
@@ -384,11 +386,17 @@ class TextPipeProcessing:
             
                 tokens = [token for token in tokens if token in words]
             
-            return " ".join(tokens)
+            return " ".join(tokens) if i == 0 else tokens
         
         self.data_frame.index = list(range(self.data_frame.shape[0]))
         
         self.data_frame[new_text_column_name] = self.data_frame.index.map(clean_text)
+        
+        if add_list_column:
+            
+            i += 1
+            
+            self.data_frame['words_list'] = self.data_frame.index.map(clean_text)
         
         self.text_column = new_text_column_name
         
@@ -468,6 +476,49 @@ class TextPipeProcessing:
             else:
                 
                 raise ValueError("You must create bigrams and trigrams before using them to predict the next word of your text!")
+    
+    def information(self, min_freq: int, global_freq: int):
+        
+        return log2(global_freq / min_freq)
+    
+    def tf_idf(self, word):
+        
+        if not self.results:
+            
+            raise ValueError("You must recuperate results (frequencies) before using the `tf_idf` method!")
+        
+        # def find_frequency(index: int, words: Union[nltk.FreqDist, list, set, tuple] = self._results):
+        #     """Clean a given document by taking only words that are chosen as representative of the target
+
+        #     Args:
+        #         index (int): The index of the document
+        #         words (Union[nltk.FreqDist, dict, list, set, tuple]): The words that we want to preserve
+
+        #     Returns:
+        #         str: The new document
+        #     """
+            
+        #     if len(list(words.keys())[0].split(" ")) != 1:
+                
+        #         raise ValueError("Only uni grams can be provide as results to the data frame text column!")
+
+        #     tokens = self._tokens[index]
+            
+        #     if self._stemmer:
+                
+        #         tokens = [self._stemmer.stem(token) for token in tokens if self._stemmer.stem(token) in words]
+            
+        #     else:
+            
+        #         tokens = [token for token in tokens if token in words]
+            
+        #     return " ".join(tokens)
+        
+        # self.data_frame.index = list(range(self.data_frame.shape[0]))
+        
+        # self.data_frame[new_text_column_name] = self.data_frame.index.map(clean_text)
+        
+        # self.text_column = new_text_column_name
     
     def display(self, text: str, style = "dep"):
         

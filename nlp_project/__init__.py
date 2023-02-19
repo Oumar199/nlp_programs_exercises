@@ -14,6 +14,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer, word_tokenize, wordpunct_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
 from wordcloud import WordCloud
+from math import log2
 import spacy
 import re
 
